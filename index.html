@@ -775,9 +775,9 @@ code{background:#f0f4ff;color:var(--accent);padding:1px 6px;border-radius:4px;fo
       </div>
       <div id="proxy-config">
         <div class="form-grid">
-          <div class="form-group full"><label>Backend Proxy URL</label><input type="text" id="setup-proxy-url" placeholder="https://your-server.com/api/chat"></div>
+          <input type="hidden" id="setup-proxy-url" value="https://sales-oracle-test.onrender.com/api/chat">
+          <input type="hidden" id="setup-search-url" value="https://sales-oracle-test.onrender.com/api/search">
           <div class="form-group full"><label>Subscription Access Key</label><input type="password" id="setup-proxy-key" placeholder="sk-sub-..."></div>
-          <div class="form-group full"><label>Web Search URL <span style="font-weight:400;text-transform:none;font-size:10px;">(optional — enables live internet research in Mentor &amp; Prospects)</span></label><input type="text" id="setup-search-url" placeholder="https://your-server.com/api/search"></div>
         </div>
         <div class="alert info" style="margin-top:10px;"><span>ℹ️</span><span>Deploy <code>server.js</code> on Railway, Render, or any VPS. Set <code>ANTHROPIC_API_KEY</code> and <code>SUBSCRIPTION_KEYS</code> as environment variables.</span></div>
       </div>
@@ -955,10 +955,8 @@ function loadSetupFields(){
   const ebEl=document.getElementById('setup-economic-bloc');
   if(ebEl){ ebEl.value=cfg.economicBloc||''; updateCountriesDropdown(cfg.economicBloc||'',cfg.country||''); }
   // API Config tab fields
-  document.getElementById('setup-proxy-url').value=cfg.proxyUrl||'';
   document.getElementById('setup-proxy-key').value=cfg.proxyKey||'';
   document.getElementById('setup-direct-key').value=cfg.directKey||'';
-  document.getElementById('setup-search-url').value=cfg.searchUrl||'';
   setApiMode(cfg.apiMode||'proxy');
   if(cfg.company) updateHeaderCompany(cfg.company);
   if(cfg.searchUrl) document.getElementById('search-available-badge').style.display='inline-flex';
