@@ -16,4 +16,4 @@ git add -A
 git diff --cached --quiet && echo "Nothing to commit." || git commit -m "Deploy: $(date '+%Y-%m-%d %H:%M')"
 git push "$REMOTE" main
 
-echo "✅ Done! Live at: https://${GITHUB_USER,,}.github.io/${REPO}"
+echo "✅ Done! Live at: https://sumunnam.github.io/${REPO}"
