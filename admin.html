@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Oracle — Admin</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6fa;color:#1a1a2e;min-height:100vh}
+  header{background:#1a1a2e;color:#fff;padding:16px 32px;display:flex;align-items:center;gap:12px}
+  header h1{font-size:18px;font-weight:700}
+  header span{font-size:12px;opacity:0.5;margin-left:auto}
+  .container{max-width:1000px;margin:32px auto;padding:0 24px}
+  .card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px}
+  .card h2{font-size:14px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px}
+  .login-wrap{max-width:400px;margin:80px auto}
+  input,select{width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;outline:none;transition:border .15s}
+  input:focus,select:focus{border-color:#4f46e5}
+  label{display:block;font-size:12px;font-weight:600;color:#6b7280;margin-bottom:4px;margin-top:12px}
+  button{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+  .btn-primary{background:#4f46e5;color:#fff}
+  .btn-primary:hover{opacity:.88}
+  .btn-danger{background:#ef4444;color:#fff}
+  .btn-danger:hover{opacity:.88}
+  .btn-ghost{background:#f3f4f6;color:#374151}
+  .btn-ghost:hover{background:#e5e7eb}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+  .stat{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:center}
+  .stat .num{font-size:32px;font-weight:800;color:#4f46e5}
+  .stat .lbl{font-size:12px;color:#6b7280;margin-top:4px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px 12px;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;border-bottom:2px solid #f3f4f6}
+  td{padding:10px 12px;border-bottom:1px solid #f9fafb;vertical-align:middle}
+  tr:hover td{background:#fafafa}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .badge-active{background:#d1fae5;color:#065f46}
+  .badge-revoked{background:#fee2e2;color:#991b1b}
+  .actions{display:flex;gap:6px}
+  .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:#1a1a2e;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.success{background:#059669}
+  .toast.error{background:#dc2626}
+  .empty{text-align:center;padding:40px;color:#9ca3af;font-size:14px}
+  #login-section{display:block}
+  #app-section{display:none}
+  .form-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  .form-row .field{flex:1;min-width:140px}
+  .form-row .field label{margin-top:0}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ Sales Oracle Admin</h1>
+  <span id="header-url"></span>
+</header>
+
+<!-- Login -->
+<div id="login-section" class="container">
+  <div class="card login-wrap">
+    <h2>Sign In</h2>
+    <label>Server URL</label>
+    <input id="server-url" type="url" value="https://sales-oracle-test.onrender.com">
+    <label>Admin Secret</label>
+    <input id="admin-secret" type="password" placeholder="Your ADMIN_SECRET">
+    <br><br>
+    <button class="btn-primary" style="width:100%" onclick="login()">Connect →</button>
+    <p id="login-error" style="color:#dc2626;font-size:12px;margin-top:8px"></p>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app-section" class="container">
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-total">—</div><div class="lbl">Total Keys</div></div>
+    <div class="stat"><div class="num" id="stat-active">—</div><div class="lbl">Active</div></div>
+    <div class="stat"><div class="num" id="stat-usage">—</div><div class="lbl">Total Uses</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Create New Key</h2>
+    <div class="form-row">
+      <div class="field"><label>Name</label><input id="new-name" placeholder="e.g. John Smith"></div>
+      <div class="field"><label>Email</label><input id="new-email" type="email" placeholder="john@example.com"></div>
+      <div class="field"><label>Plan</label>
+        <select id="new-plan">
+          <option value="standard">Standard</option>
+          <option value="pro">Pro</option>
+          <option value="trial">Trial</option>
+        </select>
+      </div>
+      <div class="field"><label>Note</label><input id="new-note" placeholder="Optional note"></div>
+      <div><button class="btn-primary" onclick="createKey()">+ Generate Key</button></div>
+    </div>
+    <div id="new-key-result" style="margin-top:12px;display:none">
+      <label>New Key — copy now</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="new-key-value" readonly style="font-family:monospace;background:#f9fafb">
+        <button class="btn-ghost btn-sm" onclick="copyNewKey()">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="margin:0">Subscription Keys</h2>
+      <button class="btn-ghost btn-sm" onclick="loadKeys()">↻ Refresh</button>
+    </div>
+    <div id="keys-container"><div class="empty">Loading…</div></div>
+  </div>
+
+  <div style="text-align:center;margin-top:8px;margin-bottom:32px">
+    <button class="btn-ghost btn-sm" onclick="logout()">← Sign out</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let SERVER = '';
+let SECRET = '';
+
+function login() {
+  SERVER = document.getElementById('server-url').value.trim().replace(/\/$/, '');
+  SECRET = document.getElementById('admin-secret').value.trim();
+  if (!SERVER || !SECRET) { document.getElementById('login-error').textContent = 'Both fields required.'; return; }
+  fetch(`${SERVER}/admin/keys`, { headers: { 'X-Admin-Secret': SECRET } })
+    .then(r => { if (!r.ok) throw new Error('Wrong secret or server unreachable'); return r.json(); })
+    .then(() => {
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('app-section').style.display = 'block';
+      document.getElementById('header-url').textContent = SERVER;
+      loadKeys();
+    })
+    .catch(e => { document.getElementById('login-error').textContent = e.message; });
+}
+
+function logout() {
+  SERVER = ''; SECRET = '';
+  document.getElementById('login-section').style.display = 'block';
+  document.getElementById('app-section').style.display = 'none';
+}
+
+async function loadKeys() {
+  const r = await fetch(`${SERVER}/admin/keys`, { headers: { 'X-Admin-Secret': SECRET } });
+  const data = await r.json();
+  const keys = data.keys || [];
+  const totalUses = keys.reduce((s, k) => s + (k.usageCount || 0), 0);
+  document.getElementById('stat-total').textContent = data.total || 0;
+  document.getElementById('stat-active').textContent = data.active || 0;
+  document.getElementById('stat-usage').textContent = totalUses;
+
+  if (!keys.length) {
+    document.getElementById('keys-container').innerHTML = '<div class="empty">No keys yet. Create one above.</div>';
+    return;
+  }
+
+  const rows = keys.map(k => `
+    <tr>
+      <td><span style="font-family:monospace;font-size:12px">${k.maskedKey}</span></td>
+      <td>${k.name || '—'}</td>
+      <td>${k.email || '—'}</td>
+      <td><span class="badge" style="background:#ede9fe;color:#4f46e5">${k.plan || 'standard'}</span></td>
+      <td><span class="badge ${k.active ? 'badge-active' : 'badge-revoked'}">${k.active ? 'Active' : 'Revoked'}</span></td>
+      <td>${k.usageCount || 0}</td>
+      <td style="color:#9ca3af;font-size:11px">${k.lastUsed ? new Date(k.lastUsed).toLocaleDateString() : 'Never'}</td>
+      <td>
+        <div class="actions">
+          ${k.active
+            ? `<button class="btn-danger btn-sm" onclick="revokeKey('${k.key}')">Revoke</button>`
+            : `<button class="btn-ghost btn-sm" onclick="activateKey('${k.key}')">Reactivate</button>`}
+        </div>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('keys-container').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>Key</th><th>Name</th><th>Email</th><th>Plan</th>
+        <th>Status</th><th>Uses</th><th>Last Used</th><th>Actions</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function createKey() {
+  const name  = document.getElementById('new-name').value.trim();
+  const email = document.getElementById('new-email').value.trim();
+  const plan  = document.getElementById('new-plan').value;
+  const note  = document.getElementById('new-note').value.trim();
+  if (!name) { toast('Name is required', 'error'); return; }
+  const r = await fetch(`${SERVER}/admin/keys`, {
+    method: 'POST',
+    headers: { 'X-Admin-Secret': SECRET, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, plan, note }),
+  });
+  const data = await r.json();
+  document.getElementById('new-key-value').value = data.key;
+  document.getElementById('new-key-result').style.display = 'block';
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-email').value = '';
+  document.getElementById('new-note').value = '';
+  toast('Key created!', 'success');
+  loadKeys();
+}
+
+function copyNewKey() {
+  navigator.clipboard.writeText(document.getElementById('new-key-value').value)
+    .then(() => toast('Copied!', 'success'));
+}
+
+async function revokeKey(key) {
+  if (!confirm('Revoke this key? The user will lose access immediately.')) return;
+  await fetch(`${SERVER}/admin/keys/revoke`, {
+    method: 'POST',
+    headers: { 'X-Admin-Secret': SECRET, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key }),
+  });
+  toast('Key revoked', 'success');
+  loadKeys();
+}
+
+async function activateKey(key) {
+  await fetch(`${SERVER}/admin/keys/activate`, {
+    method: 'POST',
+    headers: { 'X-Admin-Secret': SECRET, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key }),
+  });
+  toast('Key reactivated', 'success');
+  loadKeys();
+}
+
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(() => el.className = 'toast', 2500);
+}
+
+document.getElementById('admin-secret').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
